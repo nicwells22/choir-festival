@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voices of the Valley — East Tennessee Community Choir Festival · December 2026</title>
+  <meta name="description" content="Voices of the Valley, the East Tennessee Community Choir Festival. December 3–5, 2026. Three choirs by age group, each preparing three songs plus a combined finale, culminating in a Saturday evening performance. Register your interest today." />
+  <style>
+    :root {
+      --cream: #faf6ef;
+      --parchment: #f3ecdf;
+      --ink: #2b2620;
+      --ink-soft: #5c554a;
+      --burgundy: #7a2e2e;
+      --burgundy-deep: #5e2121;
+      --gold: #c19a3f;
+      --gold-light: #e8d9ae;
+      --green: #3c5540;
+      --white: #ffffff;
+      --radius: 14px;
+      --shadow-soft: 0 10px 30px rgba(43, 38, 32, 0.10);
+      --shadow-card: 0 6px 18px rgba(43, 38, 32, 0.08);
+      --font-display: Georgia, 'Times New Roman', serif;
+      --font-body: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--ink);
+      background-color: var(--cream);
+      line-height: 1.65;
+    }
+
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+
+    a { color: var(--burgundy); }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      background:
+        radial-gradient(ellipse at 50% -10%, rgba(193, 154, 63, 0.35), transparent 60%),
+        linear-gradient(160deg, #5e2121 0%, #7a2e2e 55%, #3c5540 130%);
+      color: var(--cream);
+      text-align: center;
+      padding: 96px 24px 120px;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -1px;
+      height: 80px;
+      background: var(--cream);
+      clip-path: ellipse(75% 100% at 50% 100%);
+    }
+
+    .hero-kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 0.8rem;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      margin-bottom: 18px;
+    }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+      max-width: 640px;
+      margin: 0 auto 14px;
+      color: #f0e8d6;
+    }
+
+    .hero-date {
+      display: inline-block;
+      margin-top: 26px;
+      padding: 12px 30px;
+      border: 1px solid rgba(232, 217, 174, 0.55);
+      border-radius: 999px;
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      background: rgba(250, 246, 239, 0.08);
+    }
+
+    .hero-cta {
+      margin-top: 34px;
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--ink);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    }
+    .btn-primary:hover { background: #d4b057; transform: translateY(-2px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--cream);
+      border: 1.5px solid rgba(250, 246, 239, 0.65);
+    }
+    .btn-outline:hover { background: rgba(250, 246, 239, 0.12); transform: translateY(-2px); }
+
+    /* ---------- Sections ---------- */
+    section { padding: 72px 0; }
+
+    .section-kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      color: var(--burgundy-deep);
+      margin-bottom: 16px;
+    }
+
+    .section-lead {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 48px;
+      color: var(--ink-soft);
+      font-size: 1.08rem;
+    }
+
+    /* ---------- About ---------- */
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 28px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .about-item {
+      text-align: center;
+      padding: 28px 20px;
+    }
+
+    .about-item .icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .about-item h3 {
+      font-size: 1.15rem;
+      color: var(--burgundy-deep);
+      margin-bottom: 8px;
+    }
+
+    .about-item p { color: var(--ink-soft); font-size: 0.97rem; }
+
+    /* ---------- Choirs ---------- */
+    .choirs { background: var(--parchment); }
+
+    .choir-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 28px;
+    }
+
+    .choir-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 38px 30px;
+      text-align: center;
+      border-top: 5px solid var(--gold);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .choir-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-soft); }
+
+    .choir-card .ages {
+      display: inline-block;
+      background: var(--burgundy);
+      color: var(--cream);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 5px 16px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+
+    .choir-card h3 { font-size: 1.35rem; color: var(--ink); margin-bottom: 10px; }
+    .choir-card p { color: var(--ink-soft); font-size: 0.97rem; }
+
+    /* ---------- Weekend ---------- */
+    .weekend .card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      padding: 44px 40px;
+    }
+
+    .weekend-item {
+      display: flex;
+      gap: 22px;
+      align-items: flex-start;
+      padding: 18px 0;
+      border-bottom: 1px solid #ece4d3;
+    }
+    .weekend-item:last-child { border-bottom: none; }
+
+    .weekend-day {
+      flex-shrink: 0;
+      width: 110px;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--burgundy);
+    }
+
+    .weekend-item h3 { font-size: 1.08rem; margin-bottom: 4px; }
+    .weekend-item p { color: var(--ink-soft); font-size: 0.95rem; }
+
+    .slot-list {
+      list-style: none;
+      margin: 8px 0 10px;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+    }
+    .slot-list li {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: baseline;
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+    }
+    .slot-list .slot-time {
+      flex-shrink: 0;
+      min-width: 142px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: var(--burgundy);
+    }
+    .slot-list .slot-choir { color: var(--ink); }
+
+    /* ---------- Register ---------- */
+    .register { background: linear-gradient(180deg, var(--cream) 0%, #efe6d2 100%); }
+
+    .form-card {
+      max-width: 620px;
+      margin: 0 auto;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 48px 44px;
+    }
+
+    .form-card h3 {
+      text-align: center;
+      font-size: 1.4rem;
+      color: var(--burgundy-deep);
+      margin-bottom: 6px;
+    }
+
+    .form-card > p {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #d8cfbc;
+      border-radius: 9px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: var(--cream);
+      color: var(--ink);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(193, 154, 63, 0.22);
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+    }
+    .checkbox-group input { width: auto; margin-top: 4px; }
+
+    .form-submit {
+      width: 100%;
+      margin-top: 8px;
+      font-size: 1.05rem;
+    }
+
+    .form-note {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      margin-top: 16px;
+    }
+
+    .form-error {
+      color: var(--burgundy);
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+    .form-group.invalid input,
+    .form-group.invalid select { border-color: var(--burgundy); }
+    .form-group.invalid .form-error { display: block; }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 30px 10px;
+    }
+    .form-success .check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--green);
+      color: var(--cream);
+      font-size: 1.9rem;
+      margin-bottom: 18px;
+    }
+    .form-success h3 { font-size: 1.35rem; color: var(--green); margin-bottom: 8px; }
+    .form-success p { color: var(--ink-soft); }
+
+    /* ---------- Footer ---------- */
+    footer {
+      background: var(--burgundy-deep);
+      color: #e8ddca;
+      text-align: center;
+      padding: 44px 24px;
+      font-size: 0.92rem;
+    }
+
+    footer .verse {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--gold-light);
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .hero { padding: 72px 20px 100px; }
+      section { padding: 56px 0; }
+      .form-card { padding: 36px 24px; }
+      .form-row { grid-template-columns: 1fr; }
+      .weekend .card { padding: 32px 22px; }
+      .weekend-day { width: 88px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-kicker">East Tennessee Community Choir Festival</div>
+    <h1>Voices of the Valley</h1>
+    <p class="hero-sub">
+      Three days. Three choirs. A joyful celebration of Jesus Christ through song —
+      with each choir preparing three songs and joining for one combined finale.
+    </p>
+    <div class="hero-date">December 3–5, 2026 · Thursday–Saturday</div>
+    <div class="hero-cta">
+      <a href="#register" class="btn btn-primary">Register Your Interest</a>
+      <a href="#choirs" class="btn btn-outline">Meet the Choirs</a>
+    </div>
+  </header>
+
+  <!-- About -->
+  <section id="about">
+    <div class="container">
+      <p class="section-kicker">About the Festival</p>
+      <h2 class="section-title">Come Sing With Us</h2>
+      <p class="section-lead">
+        This December, singers of every age will gather for a weekend of music,
+        friendship, and worship. Whether you love sacred hymns that testify of
+        Jesus Christ or simply love to sing something fun, there is a choir
+        waiting for you.
+      </p>
+      <div class="about-grid">
+        <div class="about-item">
+          <span class="icon">&#9836;</span>
+          <h3>Christ-Centered Music</h3>
+          <p>A program focused on the Savior — joyful, reverent, and full of light.</p>
+        </div>
+        <div class="about-item">
+          <span class="icon">&#127748;</span>
+          <h3>Three Songs &amp; a Finale</h3>
+          <p>Each choir prepares three songs of its own, then all voices unite for one combined performance.</p>
+        </div>
+        <div class="about-item">
+          <span class="icon">&#129309;</span>
+          <h3>Everyone Welcome</h3>
+          <p>Three choirs organized by age, from young children to adults. No audition required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Choirs -->
+  <section id="choirs" class="choirs">
+    <div class="container">
+      <p class="section-kicker">Three Choirs</p>
+      <h2 class="section-title">Find Your Voice</h2>
+      <p class="section-lead">
+        Each choir is grouped by age so every singer can learn and perform
+        alongside friends their own stage of life. Every choir prepares three
+        songs of its own, then all three join together for one combined finale.
+      </p>
+      <div class="choir-grid">
+        <div class="choir-card">
+          <span class="ages">Ages 7–12</span>
+          <h3>Children's Choir</h3>
+          <p>
+            Simple, heartfelt songs and plenty of energy. Young singers learn the
+            joy of praising the Lord in song — with a fun number or two mixed in.
+          </p>
+        </div>
+        <div class="choir-card">
+          <span class="ages">Ages 12–18</span>
+          <h3>Youth Choir</h3>
+          <p>
+            Uplifting, engaging music for teens. A chance to build friendships,
+            strengthen testimonies, and make something beautiful together.
+          </p>
+        </div>
+        <div class="choir-card">
+          <span class="ages">Ages 18+</span>
+          <h3>Adult Choir</h3>
+          <p>
+            Rich harmonies and beloved Christmas hymns centered on Jesus Christ.
+            All skill levels welcome — bring your voice and your heart.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Weekend -->
+  <section id="weekend" class="weekend">
+    <div class="container">
+      <p class="section-kicker">The Schedule</p>
+      <h2 class="section-title">Three Days of Song</h2>
+      <p class="section-lead">
+        Rehearsals run Thursday and Friday evenings and Saturday morning, with a
+        separate time slot for each choir — Children's, Youth, and Adult — leading
+        up to the combined performance on Saturday evening.
+      </p>
+      <div class="card">
+        <div class="weekend-item">
+          <div class="weekend-day">Thursday<br /><span style="font-weight:400;font-size:0.85rem;color:var(--ink-soft);">Dec 3</span></div>
+          <div>
+            <h3>Evening Rehearsals</h3>
+            <ul class="slot-list">
+              <li><span class="slot-time">5:30–6:45 PM</span><span class="slot-choir">Children's Choir</span></li>
+              <li><span class="slot-time">7:00–8:15 PM</span><span class="slot-choir">Youth Choir</span></li>
+              <li><span class="slot-time">8:30–9:45 PM</span><span class="slot-choir">Adult Choir</span></li>
+            </ul>
+            <p>Each choir meets with its director to begin learning its three songs. Come to the slot for your choir — you're free before and after it.</p>
+          </div>
+        </div>
+        <div class="weekend-item">
+          <div class="weekend-day">Friday<br /><span style="font-weight:400;font-size:0.85rem;color:var(--ink-soft);">Dec 4</span></div>
+          <div>
+            <h3>Evening Rehearsals</h3>
+            <ul class="slot-list">
+              <li><span class="slot-time">5:30–6:45 PM</span><span class="slot-choir">Children's Choir</span></li>
+              <li><span class="slot-time">7:00–8:15 PM</span><span class="slot-choir">Youth Choir</span></li>
+              <li><span class="slot-time">8:30–9:45 PM</span><span class="slot-choir">Adult Choir</span></li>
+            </ul>
+            <p>More time with each choir in the same slots as Thursday, plus work on the combined finale.</p>
+          </div>
+        </div>
+        <div class="weekend-item">
+          <div class="weekend-day">Saturday<br /><span style="font-weight:400;font-size:0.85rem;color:var(--ink-soft);">Dec 5 · AM</span></div>
+          <div>
+            <h3>Morning Rehearsals</h3>
+            <ul class="slot-list">
+              <li><span class="slot-time">10:00–10:45 AM</span><span class="slot-choir">Children's Choir</span></li>
+              <li><span class="slot-time">10:35–11:20 AM</span><span class="slot-choir">Youth Choir</span></li>
+              <li><span class="slot-time">11:10–11:55 AM</span><span class="slot-choir">Adult Choir</span></li>
+            </ul>
+            <p>Each 45-minute slot overlaps the next by 10 minutes, giving us time for combined-choir rehearsals before the performance.</p>
+          </div>
+        </div>
+        <div class="weekend-item">
+          <div class="weekend-day">Saturday<br /><span style="font-weight:400;font-size:0.85rem;color:var(--ink-soft);">Dec 5 · PM</span></div>
+          <div>
+            <h3>6:00 PM — Festival Performance</h3>
+            <p>The concert begins at 6:00 PM. Each choir shares its three songs, closing with one combined performance celebrating the Savior. Singers should plan to arrive before 6:00 PM to gather and warm up; the audience is welcome from the time doors open. Admission is free, and all are welcome — invite family, friends, and neighbors.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Register -->
+  <section id="register" class="register">
+    <div class="container">
+      <p class="section-kicker">Register Your Interest</p>
+      <h2 class="section-title">Raise Your Hand</h2>
+      <p class="section-lead">
+        This is not the official signup — it's a way to say "I'd love to be part
+        of this," whether by singing or lending a hand. There's plenty to do, and
+        we'll send you a notification the moment official registration opens.
+      </p>
+      <div class="form-card">
+        <form id="interest-form" novalidate>
+          <h3>I'd Love to Take Part</h3>
+          <p>Whether you'd like to sing or help out, it takes less than a minute.</p>
+
+          <div class="form-group" id="fg-name">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" placeholder="First and last name" required />
+            <div class="form-error">Please enter your name.</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" id="fg-email">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" required />
+              <div class="form-error">Please enter a valid email address.</div>
+            </div>
+            <div class="form-group" id="fg-choir">
+              <label for="choir">How Would You Like to Join?</label>
+              <select id="choir" name="choir" required>
+                <option value="" disabled selected>Choose an option</option>
+                <option value="children">Children's Choir (7–12)</option>
+                <option value="youth">Youth Choir (12–18)</option>
+                <option value="adult">Adult Choir (18+)</option>
+                <option value="multiple">More than one / family</option>
+                <option value="helper">I'd rather not sing, but I'd like to help</option>
+              </select>
+              <div class="form-error">Please choose an option.</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Anything Else? <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Number of singers, how you'd like to help, questions, instruments you play..."></textarea>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="notify" name="notify" checked />
+            <label for="notify" style="font-weight:400;">Notify me when official registration opens</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary form-submit">Count Me In</button>
+          <p class="form-note">We'll only use your information to contact you about the choir festival.</p>
+        </form>
+
+        <div class="form-success" id="form-success">
+          <div class="check">&#10003;</div>
+          <h3>Thank You!</h3>
+          <p>Your interest has been recorded. We'll notify you as soon as official registration opens. We can't wait to have you with us!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p class="verse">"Glory to God in the highest, and on earth peace, good will toward men." — Luke 2:14</p>
+    <p>Voices of the Valley &middot; East Tennessee Community Choir Festival &middot; December 3–5, 2026 &middot; All are welcome</p>
+  </footer>
+
+  <script>
+    /*
+      To collect real submissions, point FORM_ENDPOINT at a form service
+      (e.g. Formspree, a Google Forms action URL, or your own backend).
+      Until then, submissions are stored in this browser's localStorage
+      so the page still works end-to-end for demos.
+    */
+    const FORM_ENDPOINT = "";
+
+    const form = document.getElementById("interest-form");
+    const success = document.getElementById("form-success");
+
+    function setInvalid(id, invalid) {
+      document.getElementById(id).classList.toggle("invalid", invalid);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const choir = document.getElementById("choir").value;
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      setInvalid("fg-name", !name);
+      setInvalid("fg-email", !emailOk);
+      setInvalid("fg-choir", !choir);
+      if (!name || !emailOk || !choir) return;
+
+      const entry = {
+        name,
+        email,
+        choir,
+        notes: document.getElementById("notes").value.trim(),
+        notify: document.getElementById("notify").checked,
+        submittedAt: new Date().toISOString(),
+      };
+
+      if (FORM_ENDPOINT) {
+        try {
+          const res = await fetch(FORM_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(entry),
+          });
+          if (!res.ok) throw new Error("Submission failed");
+        } catch (err) {
+          alert("Sorry, something went wrong submitting the form. Please try again.");
+          return;
+        }
+      } else {
+        const existing = JSON.parse(localStorage.getItem("choirInterest") || "[]");
+        existing.push(entry);
+        localStorage.setItem("choirInterest", JSON.stringify(existing));
+      }
+
+      form.style.display = "none";
+      success.style.display = "block";
+      success.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  </script>
+</body>
+</html>
