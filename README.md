@@ -49,24 +49,34 @@ Existing environment variables take precedence over `.env`.
 2. Add `DATABASE_URL` in your Vercel project's environment variables for the
    environments you plan to deploy. Use a separate Neon branch/database for
    Preview deployments if you want to keep test entries out of production.
-3. Initialize or upgrade each target database before serving traffic. Set
-   `DATABASE_URL` in your local, ignored `.env` to that database's connection
-   string and run:
-
-   ```powershell
-   .venv/Scripts/python.exe manage.py init-db
-   ```
-
-4. Import this repository into Vercel using the **FastAPI** framework preset.
+3. Import this repository into Vercel using the **FastAPI** framework preset.
    Leave the build command and output directory at their framework defaults.
    `app.py` exports the application, `.python-version` selects Python 3.13, and
    `vercel.json` includes the festival and admin pages in the function bundle.
-5. Deploy, then check `/api/health` for `{"status":"ok"}` and submit a test entry.
+4. Deploy, then check `/api/health` for `{"status":"ok"}` and submit a test entry.
 
-`init-db` creates missing tables and applies the family-form upgrade: a child
-names table and an adult volunteer column. **Run it again for an existing Neon
-database before deploying this update.** The upgrade is repeatable and preserves
-all existing submissions. Earlier helper entries retain their willingness to
+The app automatically initializes the database on startup, both with local
+SQLite and Neon on Vercel. It creates missing tables and indexes, and applies
+the family-form upgrade (the child names table and adult volunteer column)
+before serving requests. No custom build command or manual initialization step
+is required. If you previously set the Build Command to `python manage.py init-db`,
+you can return it to the framework default.
+
+Concurrent Vercel starts are serialized using a transaction-scoped Postgres
+advisory lock on the same connection as the schema changes. The lock releases
+automatically when the transaction commits or rolls back and is compatible
+with Neon's transaction pooler. Local SQLite uses a write transaction for the
+same purpose. Initialization failures stop startup rather than serve requests
+against an incomplete schema; logs include the database error type and SQLSTATE
+without printing credentials or submission data.
+
+The configured Neon role needs permission to create tables and indexes and
+alter the existing festival tables. The app creates objects inside the database
+specified by `DATABASE_URL`; create that Neon database through Neon first.
+
+`manage.py init-db` remains an optional administration command and uses the
+same initializer. The upgrade is repeatable and preserves all existing
+submissions. Earlier helper entries retain their willingness to
 volunteer; earlier child names are marked as not recorded rather than guessed
 from the old name field. Historical notification preferences remain in storage
 but are no longer collected or shown. Future schema changes will need migrations.
@@ -138,6 +148,7 @@ to a Postgres server. Test the Neon-backed app after deploying to Vercel using
 the deployment smoke check described above.
 
 The tests cover family and child persistence, validation, retry handling,
-volunteer preferences, upgrading the original SQLite schema, database failures,
+volunteer preferences, automatic schema upgrades, simultaneous initialization,
+rollback and retry after initialization failures, database failures,
 admin authentication, totals, pagination, child/contact search, private data
 access, CSV export, and deployment configuration checks.
