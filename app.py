@@ -7,6 +7,7 @@ import os
 import secrets
 from typing import Annotated
 from uuid import UUID
+from asyncio import to_thread
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -20,6 +21,16 @@ from sqlalchemy.orm import Session
 from database import ROOT, Interest, InterestChild, build_engine, initialize_database
 
 logger = logging.getLogger(__name__)
+
+
+def log_database_failure(exc: SQLAlchemyError, operation: str) -> None:
+    original = getattr(exc, "orig", None)
+    logger.error(
+        "Database %s failed (%s; driver=%s; SQLSTATE=%s); check database access and schema permissions.",
+        operation, type(exc).__name__,
+        type(original).__name__ if original is not None else "unknown",
+        getattr(original, "sqlstate", None) or "unknown",
+    )
 
 
 class InterestSubmission(BaseModel):
@@ -99,12 +110,18 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
-        # Initialize local storage automatically. Initialize Postgres explicitly
-        # with manage.py before deployment, avoiding DDL races on cold starts.
-        if engine.dialect.name == "sqlite":
-            initialize_database(engine)
-        yield
-        engine.dispose()
+        try:
+            try:
+                # Finish schema setup before serving requests on either backend.
+                # The initializer serializes concurrent starts at the database.
+                await to_thread(initialize_database, engine)
+            except SQLAlchemyError as exc:
+                log_database_failure(exc, "initialization")
+                raise
+            logger.info("Database schema ready.")
+            yield
+        finally:
+            engine.dispose()
 
     application = FastAPI(title="Voices of the Valley", lifespan=lifespan)
     application.state.engine = engine
@@ -139,7 +156,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
     @application.exception_handler(SQLAlchemyError)
     async def database_unavailable(request: Request, exc: SQLAlchemyError):
-        logger.error("Database request failed (%s); check database access and schema initialization.", type(exc).__name__)
+        log_database_failure(exc, "request")
         message = (
             "We couldn't load registrations. Please try again shortly."
             if request.url.path.startswith("/api/admin/")

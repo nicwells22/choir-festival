@@ -15,6 +15,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.pool import NullPool
 
 ROOT = Path(__file__).resolve().parent
+# Stable across instances and deployments; the lock is scoped to this database.
+SCHEMA_LOCK_KEY = 0x43484F4952464553
 
 
 class Base(DeclarativeBase):
@@ -61,11 +63,25 @@ class InterestChild(Base):
 def initialize_database(engine: Engine) -> None:
     """Create tables and apply the additive family-form upgrade without losing entries."""
     with engine.begin() as connection:
+        if engine.dialect.name == "postgresql":
+            # Transaction locks work with Neon's transaction pooler and release
+            # on commit/rollback, even if an instance stops during initialization.
+            connection.execute(text("SET LOCAL lock_timeout = '10s'"))
+            connection.execute(
+                text("SELECT pg_advisory_xact_lock(:key)"), {"key": SCHEMA_LOCK_KEY}
+            )
+        elif engine.dialect.name == "sqlite":
+            # Serialize local processes and make SQLite's DDL transactional too.
+            connection.exec_driver_sql("BEGIN IMMEDIATE")
         Base.metadata.create_all(connection)
         columns = {column["name"] for column in inspect(connection).get_columns("interests")}
         if "volunteer" not in columns:
             connection.execute(text("ALTER TABLE interests ADD COLUMN volunteer BOOLEAN NOT NULL DEFAULT FALSE"))
             connection.execute(text("UPDATE interests SET volunteer = TRUE WHERE choir = 'helper'"))
+        # create_all skips existing tables, including any missing indexes on them.
+        for table in Base.metadata.sorted_tables:
+            for index in table.indexes:
+                index.create(connection, checkfirst=True)
 
 
 def build_engine(database_url: str | None = None) -> Engine:

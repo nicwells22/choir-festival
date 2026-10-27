@@ -1,14 +1,17 @@
 import csv
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+from threading import Barrier
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select, text
+from sqlalchemy import func, inspect, select, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app import create_app
-from database import Interest, InterestChild, build_engine, initialize_database
+from database import Base, Interest, InterestChild, build_engine, initialize_database
 from manage import main
 
 
@@ -233,24 +236,98 @@ def test_original_sqlite_database_upgrades_without_losing_submissions(tmp_path, 
                 INSERT INTO interests (id, name, email, choir, notes, notify)
                 VALUES (:id, 'Original Helper', 'legacy@example.com', 'helper', 'Original notes', TRUE)
             """), {"id": original_id.hex})
-        initialize_database(engine)
-        initialize_database(engine)
-        with Session(engine) as session:
-            original = session.get(Interest, original_id)
-            assert original.name == "Original Helper"
-            assert original.notes == "Original notes"
-            assert original.notify is True
-            assert original.volunteer is True
-            assert original.children == []
         application = create_app(url)
         with TestClient(application) as client:
+            # Startup alone upgrades the old schema before the first request.
+            with Session(engine) as session:
+                original = session.get(Interest, original_id)
+                assert original.name == "Original Helper"
+                assert original.notes == "Original notes"
+                assert original.notify is True
+                assert original.volunteer is True
+                assert original.children == []
             assert client.post("/api/interests", json=submission).status_code == 201
             result = client.get("/api/admin/interests", auth=("festival-admin", "test-only-admin-password")).json()
             assert result["total"] == 2
             assert result["total_children"] == 1
             assert result["total_volunteers"] == 1
+        # Another cold start preserves both the legacy and new family records.
+        with TestClient(create_app(url)) as client:
+            assert client.get("/api/health").json() == {"status": "ok"}
+            assert client.post("/api/interests", json=submission).status_code == 200
+        with Session(engine) as session:
+            assert session.scalar(select(func.count()).select_from(Interest)) == 2
+            assert session.scalar(select(func.count()).select_from(InterestChild)) == 1
     finally:
         engine.dispose()
+
+
+def test_simultaneous_sqlite_initialization_is_safe(tmp_path):
+    url = f"sqlite:///{(tmp_path / 'concurrent.db').as_posix()}"
+    engines = [build_engine(url), build_engine(url)]
+    barrier = Barrier(2)
+
+    def initialize(engine):
+        barrier.wait(timeout=5)
+        initialize_database(engine)
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = [executor.submit(initialize, engine) for engine in engines]
+            for future in futures:
+                future.result(timeout=15)
+        assert set(inspect(engines[0]).get_table_names()) == {"interests", "interest_children"}
+        with Session(engines[0]) as session:
+            assert session.scalar(select(func.count()).select_from(Interest)) == 0
+            assert session.scalar(select(func.count()).select_from(InterestChild)) == 0
+    finally:
+        for engine in engines:
+            engine.dispose()
+
+
+def test_failed_schema_creation_rolls_back_and_can_retry(tmp_path, monkeypatch):
+    engine = build_engine(f"sqlite:///{(tmp_path / 'retry.db').as_posix()}")
+    create_all = Base.metadata.create_all
+
+    def interrupted_creation(connection):
+        create_all(connection)
+        raise OperationalError("schema initialization", {}, RuntimeError("interrupted"))
+
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(Base.metadata, "create_all", interrupted_creation)
+            with pytest.raises(OperationalError):
+                initialize_database(engine)
+        assert inspect(engine).get_table_names() == []
+        initialize_database(engine)
+        assert set(inspect(engine).get_table_names()) == {"interests", "interest_children"}
+    finally:
+        engine.dispose()
+
+
+def test_initializer_restores_missing_index(client, application):
+    engine = application.state.engine
+    with engine.begin() as connection:
+        connection.exec_driver_sql("DROP INDEX ix_interests_email")
+    initialize_database(engine)
+    assert "ix_interests_email" in {index["name"] for index in inspect(engine).get_indexes("interests")}
+
+
+def test_database_diagnostics_log_error_code_without_private_data(caplog):
+    from app import log_database_failure
+
+    class DatabasePermissionError(Exception):
+        sqlstate = "42501"
+
+    error = OperationalError(
+        "INSERT INTO interests", {"email": "private@example.com"},
+        DatabasePermissionError("sensitive credentials"),
+    )
+    log_database_failure(error, "initialization")
+    assert "driver=DatabasePermissionError" in caplog.text
+    assert "SQLSTATE=42501" in caplog.text
+    assert "private@example.com" not in caplog.text
+    assert "sensitive credentials" not in caplog.text
 
 
 @pytest.fixture
