@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Registered Interest · Voices of the Valley</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --cream: #fffcf6;
+      --ink: #293e35;
+      --soft: #56645b;
+      --green: #355f4b;
+      --blue: #456d87;
+      --border: #d4ddcf;
+      --cranberry: #883541;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--cream); color: var(--ink); font: 1rem/1.6 'Segoe UI', Arial, sans-serif; }
+    button, input { font: inherit; }
+    a { color: var(--blue); }
+    :focus-visible { outline: 3px solid var(--cranberry); outline-offset: 4px; }
+    .container { width: min(1240px, 100%); margin: 0 auto; padding: 0 28px; }
+    .topbar { background: #edf3e8; border-top: 5px solid #f5e6c2; border-bottom: 1px solid var(--border); }
+    .topbar .container { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-block: 20px; }
+    .brand { font: 600 1.3rem Georgia, serif; color: var(--green); text-decoration: none; }
+    .back { font-size: 0.9rem; }
+    main.container { padding-block: 44px 60px; }
+    .kicker { color: var(--cranberry); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 8px; }
+    h1, h2 { font-family: Georgia, serif; line-height: 1.2; }
+    h1 { font-size: clamp(2rem, 5vw, 2.7rem); margin: 0 0 12px; color: var(--green); }
+    .lead { color: var(--soft); margin: 0; }
+    .summary { display: flex; align-items: center; gap: 32px; margin: 28px 0 32px; padding: 24px 32px; border: 1px solid var(--border); border-radius: 16px; background: linear-gradient(120deg, #e4eddf, #fff8e9); }
+    .total { font-size: clamp(3.5rem, 9vw, 5rem); line-height: 1.1; font-weight: 750; color: var(--blue); font-variant-numeric: tabular-nums; min-width: 1.2em; }
+    .total-label { font-size: 1.25rem; font-weight: 700; margin: 0 0 5px; }
+    .count-note { color: var(--soft); margin: 0; font-size: 0.92rem; max-width: 600px; }
+    .family-totals { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 12px; color: var(--green); font-size: 0.95rem; }
+    .family-totals strong { font-size: 1.2rem; }
+    .list-card { border: 1px solid var(--border); border-radius: 16px; background: #fff; box-shadow: 0 6px 22px #355f4b0c; overflow: hidden; }
+    .toolbar { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 24px; }
+    .search { flex: 1; max-width: 560px; }
+    .search label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+    .search input { width: 100%; min-width: 0; padding: 11px 14px; background: var(--cream); border: 1px solid #94a38e; border-radius: 8px; color: var(--ink); }
+    .button { padding: 11px 20px; border: 1px solid #8aa28a; border-radius: 999px; background: #fff; color: var(--green); cursor: pointer; font-weight: 600; white-space: nowrap; }
+    .button:hover:not(:disabled) { background: #edf3e8; }
+    .button-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .button-primary:hover:not(:disabled) { background: #365a73; }
+    .button:disabled { opacity: 0.5; cursor: default; }
+    .results-summary { padding: 0 24px 16px; margin: 0; color: var(--soft); font-size: 0.9rem; }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; min-width: 1000px; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    thead { background: #f1f5ed; }
+    th, td { padding: 17px 20px; border-bottom: 1px solid #e4ebdf; vertical-align: top; }
+    thead th { color: var(--green); font-size: 0.8rem; letter-spacing: 0.03em; }
+    tbody th { font-weight: 600; min-width: 145px; }
+    tbody tr:last-child > * { border-bottom: 0; }
+    td { overflow-wrap: anywhere; }
+    .email { min-width: 190px; max-width: 260px; }
+    .children { min-width: 170px; white-space: pre-wrap; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 8px; background: #e4eddf; color: var(--green); font-size: 0.8rem; font-weight: 600; }
+    .badge-helper { background: #fbf0d9; color: #856020; }
+    .notes { min-width: 200px; max-width: 330px; white-space: pre-wrap; }
+    .date { min-width: 170px; color: var(--soft); }
+    .muted { color: var(--soft); }
+    .empty { padding: 48px 24px; text-align: center; border-top: 1px solid #e4ebdf; }
+    .empty h2 { color: var(--green); font-size: 1.4rem; margin: 0 0 10px; }
+    .empty p { margin: 0; color: var(--soft); }
+    .error { color: var(--cranberry); background: #fbecef; border: 1px solid #e7c5ca; border-radius: 8px; padding: 14px 18px; margin: 0 24px 20px; }
+    .pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border-top: 1px solid var(--border); }
+    .page-number { font-size: 0.9rem; color: var(--soft); }
+    .pagination-buttons { display: flex; gap: 10px; }
+    .footer-note { font-size: 0.85rem; color: var(--soft); margin: 20px 0 0; }
+    @media (max-width: 640px) {
+      .container { padding-inline: 18px; }
+      .topbar .container { align-items: start; flex-direction: column; gap: 4px; }
+      main.container { padding-top: 28px; }
+      .summary { padding: 22px; gap: 18px; flex-wrap: wrap; }
+      .toolbar { align-items: stretch; flex-direction: column; padding: 20px; gap: 14px; }
+      .search { max-width: none; }
+      .results-summary { padding-inline: 20px; }
+      .pagination { flex-wrap: wrap; padding: 18px 20px; }
+      .pagination-buttons { width: 100%; }
+      .pagination-buttons .button { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <a href="/" class="brand">Voices of the Valley</a>
+      <a href="/" class="back">Back to the festival</a>
+    </div>
+  </header>
+  <main class="container">
+    <p class="kicker">Admin portal</p>
+    <h1>Registered Interest</h1>
+    <p class="lead">Everyone who has expressed interest in the festival, all in one place.</p>
+
+    <section class="summary" aria-labelledby="total-label">
+      <div class="total" id="total-count" aria-live="polite" aria-atomic="true">—</div>
+      <div>
+        <h2 class="total-label" id="total-label">Total interest submissions</h2>
+        <p class="count-note">All saved family submissions and earlier entries. These totals stay visible when you search.</p>
+        <div class="family-totals">
+          <span><strong id="children-count">—</strong> children listed</span>
+          <span><strong id="volunteers-count">—</strong> volunteer offers</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="list-card" aria-label="Interest registrations">
+      <div class="toolbar">
+        <form class="search" id="search-form" role="search">
+          <label for="search">Search registrations</label>
+          <input id="search" type="search" maxlength="120" placeholder="Search children, contacts, email, or notes" autocomplete="off" />
+        </form>
+        <button class="button button-primary" id="refresh" type="button">Refresh list</button>
+      </div>
+      <p class="results-summary" id="results-summary" role="status">Loading registrations…</p>
+      <p class="error" id="error" role="alert" hidden></p>
+      <div class="table-scroll" id="table-scroll" role="region" aria-label="Registration details; scroll horizontally for more columns" tabindex="0" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Child names</th>
+              <th scope="col">Contact name</th>
+              <th scope="col">Contact email</th>
+              <th scope="col">Adult volunteer</th>
+              <th scope="col">Notes</th>
+              <th scope="col">Submitted</th>
+            </tr>
+          </thead>
+          <tbody id="registrations"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty" hidden>
+        <h2 id="empty-title">No registrations yet</h2>
+        <p id="empty-message">New interest submissions will appear here.</p>
+      </div>
+      <nav class="pagination" aria-label="Registration pages">
+        <span class="page-number" id="page-number">Page 1</span>
+        <div class="pagination-buttons">
+          <button class="button" id="previous" type="button" disabled>Previous</button>
+          <button class="button" id="next" type="button" disabled>Next</button>
+        </div>
+      </nav>
+    </section>
+    <p class="footer-note">Each family form counts as one submission. Children listed counts the names supplied; earlier entries may not include child names. Newest submissions appear first.</p>
+    <noscript><p>Enable JavaScript to load the registration list.</p></noscript>
+  </main>
+  <script>
+    const total = document.getElementById("total-count");
+    const rows = document.getElementById("registrations");
+    const table = document.getElementById("table-scroll");
+    const summary = document.getElementById("results-summary");
+    const error = document.getElementById("error");
+    const empty = document.getElementById("empty");
+    const search = document.getElementById("search");
+    const refresh = document.getElementById("refresh");
+    const previous = document.getElementById("previous");
+    const next = document.getElementById("next");
+    const pageNumber = document.getElementById("page-number");
+    const number = new Intl.NumberFormat();
+    const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
+    let currentPage = 1;
+    let totalPages = 1;
+    let controller;
+    let searchTimer;
+    let requestId = 0;
+    let hasResults = false;
+
+    function cell(row, value, className = "", heading = false) {
+      const element = document.createElement(heading ? "th" : "td");
+      if (heading) element.scope = "row";
+      element.className = className;
+      element.textContent = value;
+      row.append(element);
+      return element;
+    }
+
+    function render(data) {
+      total.textContent = number.format(data.total);
+      document.getElementById("children-count").textContent = number.format(data.total_children);
+      document.getElementById("volunteers-count").textContent = number.format(data.total_volunteers);
+      currentPage = data.page;
+      totalPages = Math.max(1, Math.ceil(data.matched / data.page_size));
+      rows.replaceChildren();
+      for (const item of data.items) {
+        const row = document.createElement("tr");
+        cell(row, item.children.length ? item.children.join("\n") : "Not recorded (previous form)", "children", true);
+        cell(row, item.contact_name);
+        cell(row, item.contact_email, "email");
+        const type = cell(row, "");
+        const badge = document.createElement("span");
+        badge.className = "badge" + (item.volunteer ? " badge-helper" : "");
+        badge.textContent = item.volunteer ? "Yes, happy to help" : "No";
+        type.append(badge);
+        cell(row, item.notes || "—", "notes");
+        const timestamp = cell(row, "", "date");
+        const time = document.createElement("time");
+        time.dateTime = item.submitted_at;
+        time.textContent = dateFormat.format(new Date(item.submitted_at));
+        timestamp.append(time);
+        rows.append(row);
+      }
+      const start = data.matched ? (data.page - 1) * data.page_size + 1 : 0;
+      const end = data.matched ? start + data.items.length - 1 : 0;
+      summary.textContent = data.matched
+        ? `Showing ${number.format(start)}–${number.format(end)} of ${number.format(data.matched)}${search.value.trim() ? " matching" : ""} submissions`
+        : "0 matching submissions";
+      table.hidden = data.items.length === 0;
+      empty.hidden = data.items.length !== 0;
+      document.getElementById("empty-title").textContent = data.total ? "No matching registrations" : "No registrations yet";
+      document.getElementById("empty-message").textContent = data.total
+        ? "Try a different child, contact name, email, or note, or clear your search."
+        : "New interest submissions will appear here.";
+      pageNumber.textContent = `Page ${number.format(currentPage)} of ${number.format(totalPages)}`;
+      hasResults = true;
+    }
+
+    async function load(page = 1) {
+      const activeRequest = ++requestId;
+      controller?.abort();
+      controller = new AbortController();
+      error.hidden = true;
+      refresh.disabled = previous.disabled = next.disabled = true;
+      summary.textContent = "Loading registrations…";
+      table.setAttribute("aria-busy", "true");
+      try {
+        const params = new URLSearchParams({ page, page_size: 50, q: search.value.trim() });
+        const response = await fetch("/api/admin/interests?" + params, {
+          credentials: "same-origin", cache: "no-store", signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(response.status === 401
+            ? "Your sign-in is required. Reload the page to sign in again."
+            : "We couldn't load registrations. Please try Refresh list.");
+        }
+        const data = await response.json();
+        if (activeRequest === requestId) render(data);
+      } catch (failure) {
+        if (failure.name === "AbortError" || activeRequest !== requestId) return;
+        error.textContent = failure instanceof TypeError
+          ? "We couldn't connect. Check your connection and try Refresh list."
+          : failure.message;
+        error.hidden = false;
+        summary.textContent = hasResults ? "Unable to refresh. Previous results are still shown." : "Registrations have not loaded.";
+      } finally {
+        if (activeRequest === requestId) {
+          refresh.disabled = false;
+          previous.disabled = !hasResults || currentPage <= 1;
+          next.disabled = !hasResults || currentPage >= totalPages;
+          table.removeAttribute("aria-busy");
+        }
+      }
+    }
+
+    search.addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => load(1), 300);
+    });
+    document.getElementById("search-form").addEventListener("submit", event => {
+      event.preventDefault();
+      clearTimeout(searchTimer);
+      load(1);
+    });
+    refresh.addEventListener("click", () => load(currentPage));
+    previous.addEventListener("click", () => load(currentPage - 1));
+    next.addEventListener("click", () => load(currentPage + 1));
+    load();
+  </script>
+</body>
+</html>
