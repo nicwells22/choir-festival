@@ -99,8 +99,8 @@ your Vercel project's environment settings. `ADMIN_USERNAME` defaults to
 `admin`; set it if you'd like a different username. Restart the local server
 or redeploy after changing these settings.
 
-Open `/admin` (for example, <http://127.0.0.1:8000/admin>) or use the **Admin
-portal** link in the festival footer. Your browser will prompt for your
+Open `/admin` directly (for example, <http://127.0.0.1:8000/admin>).
+Your browser will prompt for your
 username and password. Use HTTPS on the deployed site. The portal and its
 data API are disabled until a password is configured, and both require
 authentication. Credentials are never embedded in the page or stored in
