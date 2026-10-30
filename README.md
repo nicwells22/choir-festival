@@ -18,6 +18,11 @@ false), and `notes`. A notification preference is no longer collected.
 Official registration opens **November 19, 2026**, two weeks before the festival
 begins on December 3. Expressing interest does not complete official registration.
 
+Visitors can also use the separate **Questions** form without expressing interest.
+`POST /api/questions` requires an email address and a question (up to 4,000
+characters), plus a submission UUID to prevent duplicate retries. Questions are
+saved with a server-generated timestamp and are visible only in the admin portal.
+
 ## Run locally (SQLite)
 
 Use Python 3.13. From PowerShell in this directory:
@@ -81,6 +86,9 @@ volunteer; earlier child names are marked as not recorded rather than guessed
 from the old name field. Historical notification preferences remain in storage
 but are no longer collected or shown. Future schema changes will need migrations.
 
+Startup also creates the questions table automatically on existing databases,
+preserving all family submissions and child names.
+
 Vercel requires a Postgres `DATABASE_URL`; the app refuses to fall back to an
 ephemeral SQLite file there. SQLAlchemy uses psycopg 3 with connection timeouts,
 no application connection pool, and prepared statements disabled for the Neon
@@ -115,6 +123,13 @@ multiple children. The searchable list shows child names, contact names and
 emails, adult volunteer preferences, notes, and submission times, newest first. Use
 **Next** and **Previous** to see all entries, and **Refresh list** to load new
 submissions. Existing entries from the previous age groups are also included.
+
+The **Questions** section in the same portal shows each question, the reply email,
+and the submission time, newest first. It has its own search, total, refresh, and
+pagination controls. Select an email address to reply using your email app.
+`GET /api/admin/questions` uses the same admin authentication and accepts `q`,
+`page`, and `page_size`. Questions do not count toward interest or child totals.
+The site does not send question notifications or replies automatically.
 
 ### CSV export
 
@@ -151,4 +166,6 @@ The tests cover family and child persistence, validation, retry handling,
 volunteer preferences, automatic schema upgrades, simultaneous initialization,
 rollback and retry after initialization failures, database failures,
 admin authentication, totals, pagination, child/contact search, private data
-access, CSV export, and deployment configuration checks.
+access, CSV export, and deployment configuration checks. Question checks cover
+validation, persistence across restarts, duplicate retries, private admin access,
+search and pagination, failure handling, and upgrades from existing databases.

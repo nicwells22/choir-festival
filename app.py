@@ -18,7 +18,7 @@ from sqlalchemy import func, or_, select, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from database import ROOT, Interest, InterestChild, build_engine, initialize_database
+from database import ROOT, Interest, InterestChild, Question, build_engine, initialize_database
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +83,41 @@ class AdminInterestList(BaseModel):
     page: int
     page_size: int
     items: list[AdminInterest]
+
+
+class QuestionSubmission(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    submission_id: UUID
+    email: Annotated[EmailStr, Field(max_length=254)]
+    question: Annotated[str, Field(min_length=1, max_length=4000)]
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return value.lower()
+
+
+class AdminQuestion(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    email: str
+    question: str
+    submitted_at: datetime
+
+    @field_validator("submitted_at")
+    @classmethod
+    def include_timestamp_timezone(cls, value: datetime) -> datetime:
+        return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
+
+
+class AdminQuestionList(BaseModel):
+    total: int
+    matched: int
+    page: int
+    page_size: int
+    items: list[AdminQuestion]
 
 
 def create_app(database_url: str | None = None) -> FastAPI:
@@ -157,11 +192,12 @@ def create_app(database_url: str | None = None) -> FastAPI:
     @application.exception_handler(SQLAlchemyError)
     async def database_unavailable(request: Request, exc: SQLAlchemyError):
         log_database_failure(exc, "request")
-        message = (
-            "We couldn't load registrations. Please try again shortly."
-            if request.url.path.startswith("/api/admin/")
-            else "We couldn't save your interest. Please try again shortly."
-        )
+        if request.url.path.startswith("/api/admin/"):
+            resource = "questions" if request.url.path.endswith("/questions") else "registrations"
+            message = f"We couldn't load {resource}. Please try again shortly."
+        else:
+            resource = "question" if request.url.path == "/api/questions" else "interest"
+            message = f"We couldn't save your {resource}. Please try again shortly."
         return JSONResponse(
             status_code=503,
             content={"detail": message},
@@ -223,6 +259,57 @@ def create_app(database_url: str | None = None) -> FastAPI:
                 items=[AdminInterest.model_validate(record) for record in records],
             )
 
+    @application.get(
+        "/api/admin/questions",
+        dependencies=[Depends(require_admin)],
+        response_model=AdminQuestionList,
+    )
+    def submitted_questions(
+        page: Annotated[int, Query(ge=1)] = 1,
+        page_size: Annotated[int, Query(ge=1, le=100)] = 50,
+        q: Annotated[str, Query(max_length=120)] = "",
+    ):
+        query = select(Question)
+        count_query = select(func.count()).select_from(Question)
+        search = q.strip()
+        if search:
+            matches = or_(
+                Question.email.icontains(search, autoescape=True),
+                Question.question.icontains(search, autoescape=True),
+            )
+            query = query.where(matches)
+            count_query = count_query.where(matches)
+        with Session(engine) as session:
+            total = session.scalar(select(func.count()).select_from(Question))
+            matched = session.scalar(count_query)
+            page = min(page, max(1, (matched + page_size - 1) // page_size))
+            records = session.scalars(
+                query.order_by(Question.submitted_at.desc(), Question.id.desc())
+                .offset((page - 1) * page_size).limit(page_size)
+            )
+            return AdminQuestionList(
+                total=total, matched=matched, page=page, page_size=page_size,
+                items=[AdminQuestion.model_validate(record) for record in records],
+            )
+
+    @application.post("/api/questions", status_code=201)
+    def submit_question(payload: QuestionSubmission, response: Response):
+        response.headers["Cache-Control"] = "no-store"
+        values = {"email": payload.email, "question": payload.question}
+        with Session(engine) as session:
+            session.add(Question(id=payload.submission_id, **values))
+            try:
+                session.commit()
+            except IntegrityError:
+                session.rollback()
+                existing = session.get(Question, payload.submission_id)
+                if existing is None:
+                    raise
+                if any(getattr(existing, key) != value for key, value in values.items()):
+                    raise HTTPException(409, "Please refresh the page and submit again.")
+                response.status_code = 200
+        return {"status": "recorded"}
+
     @application.get("/api/health")
     def health(response: Response):
         response.headers["Cache-Control"] = "no-store"
@@ -231,6 +318,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
             # Also confirm schema initialization, without reading personal data.
             connection.execute(select(Interest.id, Interest.volunteer).limit(0))
             connection.execute(select(InterestChild.id).limit(0))
+            connection.execute(select(Question.id).limit(0))
         return {"status": "ok"}
 
     @application.post("/api/interests", status_code=201)

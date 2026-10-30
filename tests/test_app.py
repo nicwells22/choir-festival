@@ -2,7 +2,7 @@ import csv
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from threading import Barrier
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,7 +11,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app import create_app
-from database import Base, Interest, InterestChild, build_engine, initialize_database
+from database import Base, Interest, InterestChild, Question, build_engine, initialize_database
 from manage import main
 
 
@@ -276,7 +276,7 @@ def test_simultaneous_sqlite_initialization_is_safe(tmp_path):
             futures = [executor.submit(initialize, engine) for engine in engines]
             for future in futures:
                 future.result(timeout=15)
-        assert set(inspect(engines[0]).get_table_names()) == {"interests", "interest_children"}
+        assert set(inspect(engines[0]).get_table_names()) == {"interests", "interest_children", "questions"}
         with Session(engines[0]) as session:
             assert session.scalar(select(func.count()).select_from(Interest)) == 0
             assert session.scalar(select(func.count()).select_from(InterestChild)) == 0
@@ -300,7 +300,7 @@ def test_failed_schema_creation_rolls_back_and_can_retry(tmp_path, monkeypatch):
                 initialize_database(engine)
         assert inspect(engine).get_table_names() == []
         initialize_database(engine)
-        assert set(inspect(engine).get_table_names()) == {"interests", "interest_children"}
+        assert set(inspect(engine).get_table_names()) == {"interests", "interest_children", "questions"}
     finally:
         engine.dispose()
 
@@ -335,7 +335,7 @@ def admin_auth():
     return ("festival-admin", "test-only-admin-password")
 
 
-@pytest.mark.parametrize("path", ["/admin", "/admin/", "/api/admin/interests"])
+@pytest.mark.parametrize("path", ["/admin", "/admin/", "/api/admin/interests", "/api/admin/questions"])
 def test_admin_requires_authentication(client, submission, admin_auth, path):
     client.post("/api/interests", json=submission)
     for auth in [None, ("festival-admin", "wrong"), ("wrong", admin_auth[1])]:
@@ -462,3 +462,150 @@ def test_admin_database_failure_does_not_look_like_empty_list(client, applicatio
     assert response.status_code == 503
     assert "items" not in response.json()
     assert response.headers["cache-control"] == "no-store"
+
+
+@pytest.fixture
+def question_submission():
+    return {
+        "submission_id": str(uuid4()),
+        "email": "  Curious@EXAMPLE.COM  ",
+        "question": "  Where will the rehearsal be held?  ",
+    }
+
+
+def test_question_is_saved_independently_and_survives_restart(client, application, question_submission, admin_auth):
+    response = client.post("/api/questions", json=question_submission)
+    assert response.status_code == 201
+    assert response.json() == {"status": "recorded"}
+    assert response.headers["cache-control"] == "no-store"
+    with Session(application.state.engine) as session:
+        record = session.get(Question, UUID(question_submission["submission_id"]))
+        assert record.email == "curious@example.com"
+        assert record.question == "Where will the rehearsal be held?"
+        assert record.submitted_at is not None
+        assert session.scalar(select(func.count()).select_from(Interest)) == 0
+    restarted = create_app(application.state.engine.url.render_as_string(hide_password=False))
+    with TestClient(restarted) as another_client:
+        result = another_client.get("/api/admin/questions", auth=admin_auth).json()
+        assert result["total"] == result["matched"] == 1
+        assert result["items"][0]["id"] == question_submission["submission_id"]
+        assert result["items"][0]["email"] == "curious@example.com"
+        assert result["items"][0]["question"] == "Where will the rehearsal be held?"
+        assert datetime.fromisoformat(result["items"][0]["submitted_at"]).utcoffset() is not None
+
+
+@pytest.mark.parametrize("field,value", [
+    ("email", ""), ("email", "invalid"), ("email", "x" * 250 + "@example.com"),
+    ("question", "  "), ("question", "x" * 4001),
+    ("submission_id", "invalid"), ("unexpected_field", "value"),
+])
+def test_invalid_question_never_saves_or_echoes_private_data(client, application, question_submission, field, value):
+    question_submission[field] = value
+    response = client.post("/api/questions", json=question_submission)
+    assert response.status_code == 422
+    assert "Curious@EXAMPLE.COM" not in response.text
+    assert "Where will the rehearsal be held?" not in response.text
+    with Session(application.state.engine) as session:
+        assert session.scalar(select(func.count()).select_from(Question)) == 0
+
+
+@pytest.mark.parametrize("field", ["email", "question", "submission_id"])
+def test_question_fields_are_required(client, question_submission, field):
+    question_submission.pop(field)
+    assert client.post("/api/questions", json=question_submission).status_code == 422
+
+
+def test_question_retries_do_not_duplicate_or_replace_submissions(client, application, question_submission):
+    assert client.post("/api/questions", json=question_submission).status_code == 201
+    assert client.post("/api/questions", json=question_submission).status_code == 200
+    question_submission["question"] = "Another question"
+    assert client.post("/api/questions", json=question_submission).status_code == 409
+    question_submission["submission_id"] = str(uuid4())
+    assert client.post("/api/questions", json=question_submission).status_code == 201
+    with Session(application.state.engine) as session:
+        assert session.scalar(select(func.count()).select_from(Question)) == 2
+
+
+def test_questions_are_private_and_do_not_affect_interest_totals(client, question_submission, admin_auth):
+    client.post("/api/questions", json=question_submission)
+    assert client.get("/api/questions").status_code == 405
+    response = client.get("/api/admin/questions")
+    assert response.status_code == 401
+    assert "curious@example.com" not in response.text
+    response = client.get("/api/admin/questions", auth=admin_auth)
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-robots-tag"] == "noindex, nofollow"
+    assert client.get("/api/admin/interests", auth=admin_auth).json()["total"] == 0
+
+
+def test_admin_questions_empty_state(client, admin_auth):
+    assert client.get("/api/admin/questions", auth=admin_auth).json() == {
+        "total": 0, "matched": 0, "page": 1, "page_size": 50, "items": [],
+    }
+
+
+def test_admin_questions_pagination_and_literal_search(client, application, admin_auth):
+    start = datetime(2026, 10, 29, tzinfo=timezone.utc)
+    with Session(application.state.engine) as session:
+        session.add_all([
+            Question(id=uuid4(), email=f"parent{index}@example.com",
+                     question="100% ready?" if index == 0 else f"Rehearsal question {index}",
+                     submitted_at=start + timedelta(minutes=index))
+            for index in range(55)
+        ])
+        session.commit()
+    first = client.get("/api/admin/questions", auth=admin_auth).json()
+    second = client.get("/api/admin/questions?page=2", auth=admin_auth).json()
+    assert first["total"] == second["total"] == 55
+    assert len(first["items"]) == 50
+    assert len(second["items"]) == 5
+    assert first["items"][0]["email"] == "parent54@example.com"
+    assert second["items"][-1]["email"] == "parent0@example.com"
+    assert len({item["id"] for item in first["items"] + second["items"]}) == 55
+    for search, matched in [("REHEARSAL", 54), ("parent54@example.com", 1), ("%", 1), ("_", 0), ("' OR 1=1 --", 0)]:
+        result = client.get("/api/admin/questions", params={"q": search}, auth=admin_auth).json()
+        assert result["total"] == 55
+        assert result["matched"] == matched
+    assert client.get("/api/admin/questions?page=999", auth=admin_auth).json()["page"] == 2
+
+
+@pytest.mark.parametrize("query", ["page=0", "page_size=0", "page_size=101", "q=" + "x" * 121])
+def test_admin_questions_validate_pagination_after_authentication(client, admin_auth, query):
+    assert client.get("/api/admin/questions?" + query, auth=admin_auth).status_code == 422
+    assert client.get("/api/admin/questions?" + query).status_code == 401
+
+
+def test_question_failures_never_claim_success(client, application, question_submission, admin_auth):
+    Question.__table__.drop(application.state.engine)
+    for response in [
+        client.post("/api/questions", json=question_submission),
+        client.get("/api/admin/questions", auth=admin_auth),
+    ]:
+        assert response.status_code == 503
+        assert "question" in response.json()["detail"]
+        assert "items" not in response.json()
+        assert "status" not in response.json()
+        assert response.headers["retry-after"] == "30"
+        assert response.headers["cache-control"] == "no-store"
+        assert "curious@example.com" not in response.text
+        assert "INSERT" not in response.text
+    assert client.get("/api/health").status_code == 503
+
+
+def test_question_table_added_to_existing_family_database_without_data_loss(tmp_path, monkeypatch):
+    monkeypatch.delenv("VERCEL", raising=False)
+    engine = build_engine(f"sqlite:///{(tmp_path / 'family.db').as_posix()}")
+    try:
+        Base.metadata.create_all(engine, tables=[Interest.__table__, InterestChild.__table__])
+        with Session(engine) as session:
+            session.add(Interest(id=uuid4(), name="Existing Parent", email="parent@example.com",
+                                 choir="children", notes="", notify=False,
+                                 children=[InterestChild(name="Existing Singer", position=0)]))
+            session.commit()
+        initialize_database(engine)
+        initialize_database(engine)
+        with Session(engine) as session:
+            assert session.scalar(select(Interest)).children[0].name == "Existing Singer"
+            assert session.scalar(select(func.count()).select_from(Question)) == 0
+    finally:
+        engine.dispose()

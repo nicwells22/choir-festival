@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Registered Interest · Voices of the Valley</title>
+  <title>Festival Admin · Voices of the Valley</title>
   <style>
     :root {
       color-scheme: light;
@@ -71,6 +71,11 @@
     .page-number { font-size: 0.9rem; color: var(--soft); }
     .pagination-buttons { display: flex; gap: 10px; }
     .footer-note { font-size: 0.85rem; color: var(--soft); margin: 20px 0 0; }
+    .questions-heading { margin: 48px 0 12px; font-size: 2rem; color: var(--green); }
+    .admin-nav { display: flex; gap: 24px; margin-bottom: 24px; }
+    .questions-card { margin-top: 24px; }
+    .questions-table { min-width: 650px; }
+    .question-body { min-width: 280px; white-space: pre-wrap; }
     @media (max-width: 640px) {
       .container { padding-inline: 18px; }
       .topbar .container { align-items: start; flex-direction: column; gap: 4px; }
@@ -94,7 +99,8 @@
   </header>
   <main class="container">
     <p class="kicker">Admin portal</p>
-    <h1>Registered Interest</h1>
+    <nav class="admin-nav" aria-label="Admin sections"><a href="#interests">Registered interest</a><a href="#questions">Questions</a></nav>
+    <h1 id="interests">Registered Interest</h1>
     <p class="lead">Everyone who has expressed interest in the festival, all in one place.</p>
 
     <section class="summary" aria-labelledby="total-label">
@@ -147,7 +153,39 @@
       </nav>
     </section>
     <p class="footer-note">Each family form counts as one submission. Children listed counts the names supplied; earlier entries may not include child names. Newest submissions appear first.</p>
-    <noscript><p>Enable JavaScript to load the registration list.</p></noscript>
+    <h2 class="questions-heading" id="questions">Questions</h2>
+    <p class="lead">Questions submitted through the festival page. Select an email address to reply from your email app.</p>
+    <section class="list-card questions-card" aria-label="Submitted questions">
+      <div class="toolbar">
+        <form class="search" id="question-search-form" role="search">
+          <label for="question-search">Search questions</label>
+          <input id="question-search" type="search" maxlength="120" placeholder="Search email or question" autocomplete="off" />
+        </form>
+        <button class="button button-primary" id="question-refresh" type="button">Refresh questions</button>
+      </div>
+      <p class="results-summary">Total questions: <strong id="question-total">—</strong></p>
+      <p class="results-summary" id="question-summary" role="status">Loading questions…</p>
+      <p class="error" id="question-error" role="alert" hidden></p>
+      <div class="table-scroll" id="question-table" role="region" aria-label="Question details; scroll horizontally for more columns" tabindex="0" hidden>
+        <table class="questions-table">
+          <thead><tr><th scope="col">Reply email</th><th scope="col">Question</th><th scope="col">Submitted</th></tr></thead>
+          <tbody id="question-rows"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="question-empty" hidden>
+        <h2 id="question-empty-title">No questions yet</h2>
+        <p id="question-empty-message">New questions will appear here.</p>
+      </div>
+      <nav class="pagination" aria-label="Question pages">
+        <span class="page-number" id="question-page-number">Page 1</span>
+        <div class="pagination-buttons">
+          <button class="button" id="question-previous" type="button" disabled>Previous</button>
+          <button class="button" id="question-next" type="button" disabled>Next</button>
+        </div>
+      </nav>
+    </section>
+    <p class="footer-note">Newest questions appear first. Replies are sent using your email app.</p>
+    <noscript><p>Enable JavaScript to load registrations and questions.</p></noscript>
   </main>
   <script>
     const total = document.getElementById("total-count");
@@ -269,6 +307,108 @@
     previous.addEventListener("click", () => load(currentPage - 1));
     next.addEventListener("click", () => load(currentPage + 1));
     load();
+  </script>
+  <script>
+    const questionRows = document.getElementById("question-rows");
+    const questionTable = document.getElementById("question-table");
+    const questionSummary = document.getElementById("question-summary");
+    const questionError = document.getElementById("question-error");
+    const questionSearch = document.getElementById("question-search");
+    const questionRefresh = document.getElementById("question-refresh");
+    const questionPrevious = document.getElementById("question-previous");
+    const questionNext = document.getElementById("question-next");
+    let questionPage = 1;
+    let questionPages = 1;
+    let questionController;
+    let questionSearchTimer;
+    let questionRequestId = 0;
+    let hasQuestions = false;
+
+    function renderQuestions(data) {
+      document.getElementById("question-total").textContent = number.format(data.total);
+      questionPage = data.page;
+      questionPages = Math.max(1, Math.ceil(data.matched / data.page_size));
+      questionRows.replaceChildren();
+      for (const item of data.items) {
+        const row = document.createElement("tr");
+        const emailCell = cell(row, "", "email", true);
+        const emailLink = document.createElement("a");
+        emailLink.href = "mailto:" + encodeURIComponent(item.email);
+        emailLink.textContent = item.email;
+        emailCell.append(emailLink);
+        cell(row, item.question, "question-body");
+        const timestamp = cell(row, "", "date");
+        const time = document.createElement("time");
+        time.dateTime = item.submitted_at;
+        time.textContent = dateFormat.format(new Date(item.submitted_at));
+        timestamp.append(time);
+        questionRows.append(row);
+      }
+      const start = data.matched ? (data.page - 1) * data.page_size + 1 : 0;
+      const end = data.matched ? start + data.items.length - 1 : 0;
+      questionSummary.textContent = data.matched
+        ? `Showing ${number.format(start)}–${number.format(end)} of ${number.format(data.matched)}${questionSearch.value.trim() ? " matching" : ""} questions`
+        : "0 matching questions";
+      questionTable.hidden = data.items.length === 0;
+      document.getElementById("question-empty").hidden = data.items.length !== 0;
+      document.getElementById("question-empty-title").textContent = data.total ? "No matching questions" : "No questions yet";
+      document.getElementById("question-empty-message").textContent = data.total
+        ? "Try a different email or question, or clear your search."
+        : "New questions will appear here.";
+      document.getElementById("question-page-number").textContent = `Page ${number.format(questionPage)} of ${number.format(questionPages)}`;
+      hasQuestions = true;
+    }
+
+    async function loadQuestions(page = 1) {
+      const activeRequest = ++questionRequestId;
+      questionController?.abort();
+      questionController = new AbortController();
+      questionError.hidden = true;
+      questionRefresh.disabled = questionPrevious.disabled = questionNext.disabled = true;
+      questionSummary.textContent = "Loading questions…";
+      questionTable.setAttribute("aria-busy", "true");
+      try {
+        const params = new URLSearchParams({ page, page_size: 50, q: questionSearch.value.trim() });
+        const response = await fetch("/api/admin/questions?" + params, {
+          credentials: "same-origin", cache: "no-store", signal: questionController.signal,
+        });
+        if (!response.ok) {
+          throw new Error(response.status === 401
+            ? "Your sign-in is required. Reload the page to sign in again."
+            : "We couldn't load questions. Please try Refresh questions.");
+        }
+        const data = await response.json();
+        if (activeRequest === questionRequestId) renderQuestions(data);
+      } catch (failure) {
+        if (failure.name === "AbortError" || activeRequest !== questionRequestId) return;
+        questionError.textContent = failure instanceof TypeError
+          ? "We couldn't connect. Check your connection and try Refresh questions."
+          : failure.message;
+        questionError.hidden = false;
+        questionSummary.textContent = hasQuestions ? "Unable to refresh. Previous results are still shown." : "Questions have not loaded.";
+      } finally {
+        if (activeRequest === questionRequestId) {
+          questionRefresh.disabled = false;
+          questionPrevious.disabled = !hasQuestions || questionPage <= 1;
+          questionNext.disabled = !hasQuestions || questionPage >= questionPages;
+          questionTable.removeAttribute("aria-busy");
+        }
+      }
+    }
+
+    questionSearch.addEventListener("input", () => {
+      clearTimeout(questionSearchTimer);
+      questionSearchTimer = setTimeout(() => loadQuestions(1), 300);
+    });
+    document.getElementById("question-search-form").addEventListener("submit", event => {
+      event.preventDefault();
+      clearTimeout(questionSearchTimer);
+      loadQuestions(1);
+    });
+    questionRefresh.addEventListener("click", () => loadQuestions(questionPage));
+    questionPrevious.addEventListener("click", () => loadQuestions(questionPage - 1));
+    questionNext.addEventListener("click", () => loadQuestions(questionPage + 1));
+    loadQuestions();
   </script>
 </body>
 </html>
