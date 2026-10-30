@@ -60,8 +60,19 @@ class InterestChild(Base):
     position: Mapped[int] = mapped_column(Integer)
 
 
+class Question(Base):
+    __tablename__ = "questions"
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    email: Mapped[str] = mapped_column(String(254))
+    question: Mapped[str] = mapped_column(String(4000))
+    submitted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
 def initialize_database(engine: Engine) -> None:
-    """Create tables and apply the additive family-form upgrade without losing entries."""
+    """Create tables and apply additive upgrades without losing entries."""
     with engine.begin() as connection:
         if engine.dialect.name == "postgresql":
             # Transaction locks work with Neon's transaction pooler and release

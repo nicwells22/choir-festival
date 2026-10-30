@@ -216,48 +216,6 @@
 
     .about-item p { color: var(--ink-soft); font-size: 0.97rem; }
 
-    /* ---------- Choirs ---------- */
-    .choirs {
-      background: var(--parchment);
-      border-block: 1px solid #e4ebdf;
-    }
-
-    .choir-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      max-width: 620px;
-      margin: 0 auto;
-    }
-
-    .choir-card {
-      background: var(--white);
-      border: 1px solid #e4ebdf;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-card);
-      padding: 38px 30px;
-      text-align: center;
-      border-top: 5px solid var(--gold);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .choir-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-soft); }
-
-    .choir-card .ages {
-      display: inline-block;
-      background: #fbf0d9;
-      color: var(--gold-ink);
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      padding: 5px 16px;
-      border-radius: 999px;
-      margin-bottom: 18px;
-      text-transform: uppercase;
-    }
-
-    .choir-card h3 { font-size: 1.35rem; color: var(--ink); margin-bottom: 10px; }
-    .choir-card p { color: var(--ink-soft); font-size: 0.97rem; }
-
     /* ---------- Weekend ---------- */
     .weekend .card {
       max-width: 720px;
@@ -314,6 +272,8 @@
     .slot-list .slot-choir { color: var(--ink); }
 
     /* ---------- Register ---------- */
+    .questions { background: var(--parchment); }
+
     .register {
       background: linear-gradient(155deg, #fff5e9 0%, var(--cream) 48%, #edf3e8 100%);
     }
@@ -505,8 +465,8 @@
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .btn, .choir-card { transition: none; }
-      .btn:hover, .choir-card:hover { transform: none; }
+      .btn { transition: none; }
+      .btn:hover { transform: none; }
     }
   </style>
 </head>
@@ -534,7 +494,7 @@
     <div class="hero-date">December 3–5, 2026 · Thursday–Saturday</div>
     <div class="hero-cta">
       <a href="#register" class="btn btn-primary">Register Your Interest</a>
-      <a href="#choirs" class="btn btn-outline">Meet the Choir</a>
+      <a href="#about" class="btn btn-outline">About the Experience</a>
     </div>
   </header>
 
@@ -564,31 +524,6 @@
           <span class="icon">&#129309;</span>
           <h3>Every Young Voice Welcome</h3>
           <p>One choir for singers ages 7–15. All experience levels welcome, with no audition required.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Choir -->
-  <section id="choirs" class="choirs">
-    <div class="container">
-      <p class="section-kicker">One Choir · Ages 7–15</p>
-      <h2 class="section-title">Find Your Voice</h2>
-      <p class="section-lead">
-        Young singers ages 7–15 learn and perform together in one welcoming
-        choir. We'll prepare three songs and a Christmas finale, building
-        friendships and sharing the joy of the season along the way.
-      </p>
-      <div class="choir-grid">
-        <div class="choir-card">
-          <span class="ages">Ages 7–15</span>
-          <h3>Festival Choir</h3>
-          <p>
-            Heartfelt Christmas songs, uplifting harmonies, and plenty of joy.
-            Singers ages 7–15 grow in confidence, make friends, and celebrate
-            Jesus Christ through music. All skill levels welcome — bring your
-            voice and your heart.
-          </p>
         </div>
       </div>
     </div>
@@ -701,13 +636,14 @@
 
           <div class="form-group" id="fg-notes">
             <label for="notes">Anything Else? <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
-            <textarea id="notes" name="notes" rows="3" maxlength="2000" aria-describedby="error-notes" placeholder="Questions, how you'd like to help, or anything you'd like us to know..."></textarea>
+            <textarea id="notes" name="notes" rows="3" maxlength="2000" aria-describedby="error-notes" placeholder="How you'd like to help or anything you'd like us to know..."></textarea>
             <div class="form-error" id="error-notes">Please keep your notes under 2,000 characters.</div>
           </div>
 
           <button type="submit" class="btn btn-primary form-submit">Count Me In</button>
           <p id="form-feedback" class="form-feedback" role="alert" hidden></p>
           <p class="form-note">We'll only use your information to contact you about the choir festival.</p>
+          <p class="form-note">Have a question before signing up? <a href="#questions">Ask us here.</a></p>
         </form>
 
         <div class="form-success" id="form-success" role="status" tabindex="-1" hidden>
@@ -715,6 +651,38 @@
           <h3>Thank You!</h3>
           <p id="success-message">Your family's interest has been recorded. Official registration opens November 19, 2026, two weeks before the festival. We can't wait to have you with us!</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions -->
+  <section id="questions" class="questions" aria-labelledby="questions-title">
+    <div class="container">
+      <p class="section-kicker">Questions?</p>
+      <h2 class="section-title" id="questions-title">We'd Love to Help</h2>
+      <p class="section-lead">Ask us anything about the festival. Leave your email address so we can reply. You don't need to register your interest to ask a question.</p>
+      <div class="form-card">
+        <form id="question-form" method="post" action="/api/questions" novalidate>
+          <div class="form-group" id="fg-question-email">
+            <label for="question-email">Your Email Address</label>
+            <input type="email" id="question-email" name="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required aria-describedby="error-question-email" />
+            <div class="form-error" id="error-question-email">Please enter a valid email address so we can reply.</div>
+          </div>
+          <div class="form-group" id="fg-question-text">
+            <label for="question-text">Your Question</label>
+            <textarea id="question-text" name="question" rows="5" maxlength="4000" required aria-describedby="error-question-text" placeholder="What would you like to know?"></textarea>
+            <div class="form-error" id="error-question-text">Please enter your question (up to 4,000 characters).</div>
+          </div>
+          <button type="submit" class="btn btn-primary form-submit">Send Question</button>
+          <p id="question-feedback" class="form-feedback" role="alert" hidden></p>
+          <p class="form-note">Your question and email are shared privately with the festival organizer so we can respond.</p>
+        </form>
+        <div class="form-success" id="question-success" role="status" tabindex="-1" hidden>
+          <div class="check">&#10003;</div>
+          <h3>Question Received</h3>
+          <p>Thank you for reaching out! The festival organizer will reply to the email address you provided.</p>
+        </div>
+        <noscript><p>Please enable JavaScript to send your question.</p></noscript>
       </div>
     </div>
   </section>
@@ -872,6 +840,87 @@
         updateChildControls();
         submitButton.textContent = "Count Me In";
         form.removeAttribute("aria-busy");
+      }
+    });
+  </script>
+  <script>
+    const questionForm = document.getElementById("question-form");
+    const questionEmail = document.getElementById("question-email");
+    const questionText = document.getElementById("question-text");
+    const questionFeedback = document.getElementById("question-feedback");
+    const questionButton = questionForm.querySelector('button[type="submit"]');
+    let pendingQuestion;
+
+    questionForm.addEventListener("input", event => {
+      const input = event.target;
+      if (input.validity.valid && input.value.trim()) {
+        setInvalid(input.closest(".form-group").id, false);
+      }
+    });
+
+    questionForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (questionButton.disabled) return;
+      questionFeedback.hidden = true;
+      const email = questionEmail.value.trim();
+      const question = questionText.value.trim();
+      const emailOk = questionEmail.validity.valid && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const questionOk = question.length > 0 && question.length <= 4000;
+      setInvalid("fg-question-email", !emailOk);
+      setInvalid("fg-question-text", !questionOk);
+      if (!emailOk || !questionOk) {
+        questionForm.querySelector('[aria-invalid="true"]').focus();
+        return;
+      }
+
+      const entry = { email, question };
+      const signature = JSON.stringify(entry);
+      if (!pendingQuestion || pendingQuestion.signature !== signature) {
+        pendingQuestion = { signature, id: crypto.randomUUID() };
+      }
+      questionButton.disabled = true;
+      questionButton.textContent = "Sending your question...";
+      questionForm.setAttribute("aria-busy", "true");
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+      try {
+        const response = await fetch("/api/questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...entry, submission_id: pendingQuestion.id }),
+          signal: controller.signal,
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.status === 422) {
+          for (const error of Array.isArray(result.detail) ? result.detail : []) {
+            if (error.field === "email") setInvalid("fg-question-email", true);
+            if (error.field === "question") setInvalid("fg-question-text", true);
+          }
+          throw new Error("Please check your email address and question and try again.");
+        }
+        if (response.status === 409) {
+          pendingQuestion = null;
+          throw new Error("Please try sending your question again.");
+        }
+        if (!response.ok || result.status !== "recorded") {
+          throw new Error("We couldn't save your question. Please try again shortly.");
+        }
+        questionForm.hidden = true;
+        const confirmation = document.getElementById("question-success");
+        confirmation.hidden = false;
+        confirmation.focus({ preventScroll: true });
+        confirmation.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+      } catch (failure) {
+        questionFeedback.textContent = failure instanceof TypeError || failure.name === "AbortError"
+          ? "We couldn't confirm your question was received. Check your connection and try again."
+          : failure.message;
+        questionFeedback.hidden = false;
+        questionForm.querySelector('[aria-invalid="true"]')?.focus();
+      } finally {
+        clearTimeout(timeout);
+        questionButton.disabled = false;
+        questionButton.textContent = "Send Question";
+        questionForm.removeAttribute("aria-busy");
       }
     });
   </script>
