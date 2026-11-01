@@ -1,11 +1,12 @@
 # Voices of the Valley
 
-The festival features one choir for singers ages 7–15. Families can express
+The festival features one choir for singers ages 7–12. Families can express
 interest for more than one eligible singer, and helpers are also welcome.
+Participation costs **$30 per child**. Audience admission to the performance is free.
 
 The festival page and FastAPI API run together on the same origin. Interest
 submissions go to `POST /api/interests` and are committed before success is shown.
-Each family submission includes one or more child names (ages 7–15), a contact
+Each family submission includes one or more child names (ages 7–12), a contact
 name, contact email address, an optional adult volunteer preference, optional
 notes, and a server-generated timestamp. Child names are stored separately and
 in the submitted order. A submission UUID prevents duplicate family and child
