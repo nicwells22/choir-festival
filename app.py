@@ -21,6 +21,16 @@ from sqlalchemy.orm import Session
 from database import ROOT, Interest, InterestChild, Question, build_engine, initialize_database
 
 logger = logging.getLogger(__name__)
+SIGNUPS_OPEN = False
+
+
+def require_open_signups() -> None:
+    if not SIGNUPS_OPEN:
+        raise HTTPException(
+            410,
+            "Signups are closed. We are no longer accepting new registrations.",
+            headers={"Cache-Control": "no-store"},
+        )
 
 
 def log_database_failure(exc: SQLAlchemyError, operation: str) -> None:
@@ -321,7 +331,9 @@ def create_app(database_url: str | None = None) -> FastAPI:
             connection.execute(select(Question.id).limit(0))
         return {"status": "ok"}
 
-    @application.post("/api/interests", status_code=201)
+    @application.post(
+        "/api/interests", status_code=201, dependencies=[Depends(require_open_signups)]
+    )
     def submit_interest(payload: InterestSubmission, response: Response):
         response.headers["Cache-Control"] = "no-store"
         values = {

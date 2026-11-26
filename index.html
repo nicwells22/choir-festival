@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Voices of the Valley — East Tennessee Community Choir Festival · December 2026</title>
-  <meta name="description" content="Voices of the Valley, the East Tennessee Community Choir Festival. December 3–5, 2026. One choir for singers ages 7–12, preparing Christmas music for a Saturday evening performance. Register your interest today." />
+  <meta name="description" content="Voices of the Valley, the East Tennessee Community Choir Festival. December 3–5, 2026. One choir for singers ages 7–12, preparing Christmas music for a Saturday evening performance. Signups are closed. Audience admission is free." />
   <style>
     :root {
       --cream: #fffcf6;
@@ -493,7 +493,7 @@
     </p>
     <div class="hero-date">December 3–5, 2026 · Thursday–Saturday</div>
     <div class="hero-cta">
-      <a href="#register" class="btn btn-primary">Register Your Interest</a>
+      <a href="#register" class="btn btn-primary">Signups Closed</a>
       <a href="#about" class="btn btn-outline">About the Experience</a>
     </div>
   </header>
@@ -580,79 +580,14 @@
     </div>
   </section>
 
-  <!-- Register -->
-  <section id="register" class="register">
+  <!-- Registration status -->
+  <section id="register" class="register" aria-labelledby="registration-title">
     <div class="container">
-      <p class="section-kicker">Register Your Interest</p>
-      <h2 class="section-title">Raise Your Hand</h2>
-      <p class="section-lead">
-        Let us know if your child would like to sing with us. Add each interested
-        child ages 7–12, share a parent or guardian's contact details, and let us
-        know if an adult would like to volunteer. This is an expression of
-        interest, not the official registration.
-      </p>
-      <p class="registration-notice">
-        Participation costs <strong>$30 per child</strong>.<br />
-        <strong>Official registration opens November 19, 2026</strong><br />
-        Two weeks before the festival begins on December 3.
-      </p>
-      <div class="form-card">
-        <form id="interest-form" method="post" action="/api/interests" novalidate>
-          <h3>I'd Love to Take Part</h3>
-          <p class="form-intro">One form for your children and your family's contact details.</p>
-
-          <fieldset class="children-fields" aria-describedby="children-help">
-            <legend>Children Interested in Singing</legend>
-            <p class="children-help" id="children-help">For ages 7–12. You can add another child below.</p>
-            <div id="children-list">
-              <div class="child-row">
-                <div class="form-group" id="fg-child-1">
-                  <label for="child-1">Child's Name</label>
-                  <input type="text" id="child-1" name="children" data-child-name placeholder="Child's first and last name" autocomplete="off" maxlength="120" required aria-describedby="error-child-1" />
-                  <div class="form-error" id="error-child-1">Please enter this child's name.</div>
-                </div>
-                <button type="button" class="remove-child" data-remove-child hidden>Remove</button>
-              </div>
-            </div>
-            <button type="button" class="btn btn-outline btn-add" id="add-child">Add another child</button>
-          </fieldset>
-
-          <div class="form-row">
-            <div class="form-group" id="fg-contact-email">
-              <label for="contact-email">Contact Email Address</label>
-              <input type="email" id="contact-email" name="contact_email" placeholder="you@example.com" autocomplete="email" maxlength="254" required aria-describedby="error-contact-email" />
-              <div class="form-error" id="error-contact-email">Please enter a valid contact email address.</div>
-            </div>
-            <div class="form-group" id="fg-contact-name">
-              <label for="contact-name">Contact Name</label>
-              <input type="text" id="contact-name" name="contact_name" placeholder="Parent or guardian's name" autocomplete="name" maxlength="120" required aria-describedby="error-contact-name" />
-              <div class="form-error" id="error-contact-name">Please enter a contact name.</div>
-            </div>
-          </div>
-
-          <div class="volunteer-toggle">
-            <input type="checkbox" id="volunteer" name="volunteer" role="switch" />
-            <label for="volunteer">I'm an adult and would like to help volunteer in some way.</label>
-          </div>
-
-          <div class="form-group" id="fg-notes">
-            <label for="notes">Anything Else? <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
-            <textarea id="notes" name="notes" rows="3" maxlength="2000" aria-describedby="error-notes" placeholder="How you'd like to help or anything you'd like us to know..."></textarea>
-            <div class="form-error" id="error-notes">Please keep your notes under 2,000 characters.</div>
-          </div>
-
-          <button type="submit" class="btn btn-primary form-submit">Count Me In</button>
-          <p id="form-feedback" class="form-feedback" role="alert" hidden></p>
-          <p class="form-note">We'll only use your information to contact you about the choir festival.</p>
-          <p class="form-note">Have a question before signing up? <a href="#questions">Ask us here.</a></p>
-        </form>
-
-        <div class="form-success" id="form-success" role="status" tabindex="-1" hidden>
-          <div class="check">&#10003;</div>
-          <h3>Thank You!</h3>
-          <p id="success-message">Your family's interest has been recorded. Official registration opens November 19, 2026, two weeks before the festival. We can't wait to have you with us!</p>
-        </div>
-      </div>
+      <p class="section-kicker">Registration</p>
+      <h2 class="section-title" id="registration-title">Signups Closed</h2>
+      <p class="section-lead">Thank you for your interest in Voices of the Valley. We are no longer accepting new registrations or expressions of interest.</p>
+      <p class="registration-notice">Family and friends are welcome at the festival performance on December 5 at 6:00 PM. Audience admission is free.</p>
+      <a href="#questions" class="btn btn-outline">Ask a Question</a>
     </div>
   </section>
 
@@ -661,7 +596,7 @@
     <div class="container">
       <p class="section-kicker">Questions?</p>
       <h2 class="section-title" id="questions-title">We'd Love to Help</h2>
-      <p class="section-lead">Ask us anything about the festival. Leave your email address so we can reply. You don't need to register your interest to ask a question.</p>
+      <p class="section-lead">Ask us anything about the festival. Leave your email address so we can reply. You can still ask questions while signups are closed.</p>
       <div class="form-card">
         <form id="question-form" method="post" action="/api/questions" novalidate>
           <div class="form-group" id="fg-question-email">
@@ -695,156 +630,12 @@
   </footer>
 
   <script>
-    const form = document.getElementById("interest-form");
-    const success = document.getElementById("form-success");
-    const feedback = document.getElementById("form-feedback");
-    const submitButton = form.querySelector('button[type="submit"]');
-    const childrenList = document.getElementById("children-list");
-    const addChild = document.getElementById("add-child");
-    let childId = 1;
-    let pendingSubmission;
-
-    function updateChildControls() {
-      const childRows = [...childrenList.querySelectorAll(".child-row")];
-      childRows.forEach((row, index) => {
-        row.querySelector("label").textContent = childRows.length === 1 ? "Child's Name" : `Child ${index + 1} Name`;
-        const remove = row.querySelector("[data-remove-child]");
-        remove.hidden = childRows.length === 1;
-        remove.disabled = submitButton.disabled;
-        remove.setAttribute("aria-label", `Remove child ${index + 1}`);
-      });
-      addChild.disabled = childRows.length >= 20 || submitButton.disabled;
-    }
-
-    addChild.addEventListener("click", () => {
-      if (addChild.disabled) return;
-      const row = childrenList.firstElementChild.cloneNode(true);
-      const input = row.querySelector("input");
-      const id = `child-${++childId}`;
-      row.querySelector(".form-group").id = "fg-" + id;
-      row.querySelector(".form-group").classList.remove("invalid");
-      row.querySelector("label").htmlFor = id;
-      input.id = id;
-      input.value = "";
-      input.setAttribute("aria-invalid", "false");
-      input.setAttribute("aria-describedby", "error-" + id);
-      row.querySelector(".form-error").id = "error-" + id;
-      childrenList.append(row);
-      updateChildControls();
-      input.focus();
-    });
-
-    childrenList.addEventListener("click", event => {
-      const remove = event.target.closest("[data-remove-child]");
-      if (!remove || remove.disabled || childrenList.children.length === 1) return;
-      const row = remove.closest(".child-row");
-      const nextFocus = row.nextElementSibling || row.previousElementSibling;
-      row.remove();
-      updateChildControls();
-      nextFocus.querySelector("input").focus();
-    });
-
     function setInvalid(id, invalid) {
       const group = document.getElementById(id);
       group.classList.toggle("invalid", invalid);
       group.querySelector("input, select, textarea").setAttribute("aria-invalid", String(invalid));
     }
 
-    form.addEventListener("input", event => {
-      const input = event.target;
-      const group = input.closest(".form-group.invalid");
-      if (group && input.validity.valid && (!input.required || input.value.trim())) {
-        setInvalid(group.id, false);
-      }
-    });
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (submitButton.disabled) return;
-      feedback.hidden = true;
-
-      const name = document.getElementById("contact-name").value.trim();
-      const email = document.getElementById("contact-email").value.trim();
-      const childInputs = [...childrenList.querySelectorAll("[data-child-name]")];
-      const children = childInputs.map(input => input.value.trim());
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-      setInvalid("fg-contact-name", !name);
-      setInvalid("fg-contact-email", !emailOk);
-      childInputs.forEach(input => setInvalid("fg-" + input.id, !input.value.trim()));
-      setInvalid("fg-notes", false);
-      if (!name || !emailOk || children.some(child => !child)) {
-        form.querySelector('[aria-invalid="true"]').focus();
-        return;
-      }
-
-      const entry = {
-        contact_name: name,
-        contact_email: email,
-        children,
-        volunteer: document.getElementById("volunteer").checked,
-        notes: document.getElementById("notes").value.trim(),
-      };
-
-      // Reuse the ID when retrying the same data after a lost response.
-      const signature = JSON.stringify(entry);
-      if (!pendingSubmission || pendingSubmission.signature !== signature) {
-        pendingSubmission = { signature, id: crypto.randomUUID() };
-      }
-      submitButton.disabled = true;
-      updateChildControls();
-      submitButton.textContent = "Saving your interest...";
-      form.setAttribute("aria-busy", "true");
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
-
-      try {
-        const res = await fetch("/api/interests", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...entry, submission_id: pendingSubmission.id }),
-          signal: controller.signal,
-        });
-        const result = await res.json().catch(() => ({}));
-        if (res.status === 422) {
-          for (const error of Array.isArray(result.detail) ? result.detail : []) {
-            if (error.field === "children") {
-              const index = error.path?.[1];
-              const inputs = Number.isInteger(index) ? [childInputs[index]] : childInputs;
-              inputs.filter(Boolean).forEach(input => setInvalid("fg-" + input.id, true));
-            } else if (["contact_name", "contact_email", "notes"].includes(error.field)) {
-              setInvalid("fg-" + error.field.replaceAll("_", "-"), true);
-            }
-          }
-          throw new Error("Please check the highlighted fields and try again.");
-        }
-        if (res.status === 409) {
-          pendingSubmission = null;
-          throw new Error("Please try submitting again.");
-        }
-        if (!res.ok || result.status !== "recorded") {
-          throw new Error("We couldn't save your interest. Please try again shortly.");
-        }
-        form.hidden = true;
-        success.hidden = false;
-        success.focus({ preventScroll: true });
-        success.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
-      } catch (err) {
-        feedback.textContent = err instanceof TypeError || err.name === "AbortError"
-          ? "We couldn't confirm your submission. Please check your connection and try again."
-          : err.message;
-        feedback.hidden = false;
-        form.querySelector('[aria-invalid="true"]')?.focus();
-      } finally {
-        clearTimeout(timeout);
-        submitButton.disabled = false;
-        updateChildControls();
-        submitButton.textContent = "Count Me In";
-        form.removeAttribute("aria-busy");
-      }
-    });
-  </script>
-  <script>
     const questionForm = document.getElementById("question-form");
     const questionEmail = document.getElementById("question-email");
     const questionText = document.getElementById("question-text");
