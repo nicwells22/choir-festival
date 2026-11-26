@@ -17,6 +17,9 @@ from manage import main
 
 @pytest.fixture
 def application(tmp_path, monkeypatch):
+    # Keep coverage of historical signup persistence and admin behavior.
+    # Closure is tested separately using the production default.
+    monkeypatch.setattr("app.SIGNUPS_OPEN", True)
     monkeypatch.delenv("VERCEL", raising=False)
     monkeypatch.setenv("ADMIN_USERNAME", "festival-admin")
     monkeypatch.setenv("ADMIN_PASSWORD", "test-only-admin-password")
@@ -49,10 +52,54 @@ def test_page_and_health(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "Voices of the Valley" in response.text
-    assert 'fetch("/api/interests"' in response.text
+    assert "Signups Closed" in response.text
+    assert 'id="interest-form"' not in response.text
+    assert 'fetch("/api/interests"' not in response.text
+    assert 'id="question-form"' in response.text
     assert "localStorage" not in response.text
     assert client.get("/index.html").status_code == 200
     assert client.get("/api/health").json() == {"status": "ok"}
+
+
+def test_signups_are_closed_by_default(tmp_path, monkeypatch, submission):
+    from app import SIGNUPS_OPEN
+
+    assert SIGNUPS_OPEN is False
+    monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.setenv("ADMIN_USERNAME", "festival-admin")
+    monkeypatch.setenv("ADMIN_PASSWORD", "test-only-admin-password")
+    application = create_app(f"sqlite:///{(tmp_path / 'closed.db').as_posix()}")
+    try:
+        with TestClient(application) as client:
+            # Existing families remain readable, even when an old tab retries.
+            with Session(application.state.engine) as session:
+                session.add(Interest(
+                    id=UUID(submission["submission_id"]), name="Existing Parent",
+                    email="existing@example.com", choir="children", notes="",
+                    notify=False, volunteer=False,
+                    children=[InterestChild(name="Existing Singer", position=0)],
+                ))
+                session.commit()
+            for payload in [submission, {**submission, "submission_id": str(uuid4())}, {}]:
+                response = client.post("/api/interests", json=payload)
+                assert response.status_code == 410
+                assert "Signups are closed" in response.json()["detail"]
+                assert response.headers["cache-control"] == "no-store"
+            with Session(application.state.engine) as session:
+                assert session.scalar(select(func.count()).select_from(Interest)) == 1
+                assert session.scalar(select(func.count()).select_from(InterestChild)) == 1
+                assert session.scalar(select(Interest.name)) == "Existing Parent"
+            result = client.get(
+                "/api/admin/interests", auth=("festival-admin", "test-only-admin-password")
+            ).json()
+            assert result["total"] == result["total_children"] == 1
+            assert result["items"][0]["children"] == ["Existing Singer"]
+            assert client.post("/api/questions", json={
+                "submission_id": str(uuid4()), "email": "guest@example.com",
+                "question": "What time is the concert?",
+            }).status_code == 201
+    finally:
+        application.state.engine.dispose()
 
 
 def test_submission_is_durably_saved(client, application, submission):
@@ -216,6 +263,7 @@ def test_schema_initialization_is_repeatable(client, application, submission, mo
 
 
 def test_original_sqlite_database_upgrades_without_losing_submissions(tmp_path, monkeypatch, submission):
+    monkeypatch.setattr("app.SIGNUPS_OPEN", True)
     monkeypatch.delenv("VERCEL", raising=False)
     monkeypatch.setenv("ADMIN_USERNAME", "festival-admin")
     monkeypatch.setenv("ADMIN_PASSWORD", "test-only-admin-password")

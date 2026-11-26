@@ -1,23 +1,14 @@
 # Voices of the Valley
 
-The festival features one choir for singers ages 7–12. Families can express
-interest for more than one eligible singer, and helpers are also welcome.
-Participation costs **$30 per child**. Audience admission to the performance is free.
+**Signups are closed.** The festival page displays a closure notice instead of
+an interest form. `POST /api/interests` returns HTTP 410 with a clear closure
+message, including for submissions from previously opened browser tabs. The
+server-side `SIGNUPS_OPEN` constant in `app.py` is false; no environment setting
+is needed to close signups. Existing family submissions and child names remain
+available in the admin portal and CSV export.
 
-The festival page and FastAPI API run together on the same origin. Interest
-submissions go to `POST /api/interests` and are committed before success is shown.
-Each family submission includes one or more child names (ages 7–12), a contact
-name, contact email address, an optional adult volunteer preference, optional
-notes, and a server-generated timestamp. Child names are stored separately and
-in the submitted order. A submission UUID prevents duplicate family and child
-records when the browser retries after a lost response.
-
-The form starts with one child and offers **Add another child** and removal of
-extra entries (up to 20 children per submission). The API accepts `children`
-as a list of names, `contact_name`, `contact_email`, `volunteer` (defaults to
-false), and `notes`. A notification preference is no longer collected.
-Official registration opens **November 19, 2026**, two weeks before the festival
-begins on December 3. Expressing interest does not complete official registration.
+The festival features one choir for singers ages 7–12. Participation costs
+**$30 per child**. Audience admission to the performance is free.
 
 Visitors can also use the separate **Questions** form without expressing interest.
 `POST /api/questions` requires an email address and a question (up to 4,000
@@ -59,7 +50,8 @@ Existing environment variables take precedence over `.env`.
    Leave the build command and output directory at their framework defaults.
    `app.py` exports the application, `.python-version` selects Python 3.13, and
    `vercel.json` includes the festival and admin pages in the function bundle.
-4. Deploy, then check `/api/health` for `{"status":"ok"}` and submit a test entry.
+4. Deploy, then check `/api/health` for `{"status":"ok"}` and confirm that signups
+   show as closed and `POST /api/interests` returns HTTP 410.
 
 The app automatically initializes the database on startup, both with local
 SQLite and Neon on Vercel. It creates missing tables and indexes, and applies
